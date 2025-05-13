@@ -1,10 +1,11 @@
 package api
 
 import (
+	"Ejercicio_Final-Taller_Go/internal/user"
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
-	"net/http"
-	"parte3/internal/user"
 )
 
 // InitRoutes registers all user CRUD endpoints on the given Gin engine.

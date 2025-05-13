@@ -1,4 +1,4 @@
-module parte3
+module Ejercicio_Final-Taller_Go
 
 go 1.24.2
 

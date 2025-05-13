@@ -1,9 +1,10 @@
 package main
 
 import (
+	"Ejercicio_Final-Taller_Go/api"
 	"fmt"
+
 	"github.com/gin-gonic/gin"
-	"parte3/api"
 )
 
 func main() {
