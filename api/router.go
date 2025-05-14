@@ -1,36 +1,46 @@
 package api
 
 import (
-	"Ejercicio_Final-Taller_Go/internal/user"
 	"net/http"
+
+	"parte3/internal/sales"
+	"parte3/internal/user"
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 )
 
-// InitRoutes registers all user CRUD endpoints on the given Gin engine.
-// It initializes the storage, service, and handler, then binds each HTTP
-// method and path to the appropriate handler function.
-func InitRoutes(e *gin.Engine) {
+// InitRoutes registers all user and sales CRUD endpoints on the given Gin engine.
+// It initializes the storage, service, and handler for both users and sales,
+// then binds each HTTP method and path to the appropriate handler function.
+func InitRoutes(e *gin.Engine, userAPIURL string) { // Modificamos la firma para recibir userAPIURL
 	logger, _ := zap.NewProduction()
 	defer logger.Sync()
 
-	storage := user.NewLocalStorage()
-	service := user.NewService(storage, logger)
-
-	h := handler{
-		userService: service,
+	// Inicialización de la lógica de usuarios (sin cambios)
+	userStorage := user.NewLocalStorage()
+	userService := user.NewService(userStorage, logger)
+	userHandler := handler{
+		userService: userService,
 		logger:      logger,
 	}
 
-	e.POST("/users", h.handleCreate)
-	e.GET("/users/:id", h.handleRead)
-	e.PATCH("/users/:id", h.handleUpdate)
-	e.DELETE("/users/:id", h.handleDelete)
+	e.POST("/users", userHandler.handleCreate)
+	e.GET("/users/:id", userHandler.handleRead)
+	e.PATCH("/users/:id", userHandler.handleUpdate)
+	e.DELETE("/users/:id", userHandler.handleDelete)
 
 	e.GET("/ping", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
 			"message": "pong",
 		})
 	})
+
+	// Inicialización de la lógica de ventas
+	salesStorage := sales.NewLocalStorage()
+	salesService := sales.NewService(salesStorage, logger, userAPIURL) // Usamos la userAPIURL recibida
+	salesHandler := NewSalesHandler(salesService, logger)
+
+	e.POST("/sales", salesHandler.handleCreateSale)
+	// Aquí podríamos agregar más rutas de ventas en el futuro
 }

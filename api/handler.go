@@ -1,11 +1,10 @@
 package api
 
 import (
-	"Ejercicio_Final-Taller_Go/internal/user"
 	"errors"
-	"net/http"
-
 	"go.uber.org/zap"
+	"net/http"
+	"parte3/internal/user"
 
 	"github.com/gin-gonic/gin"
 )
