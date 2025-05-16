@@ -3,8 +3,8 @@ package api
 import (
 	"net/http"
 
-	"parte3/internal/sales"
-	"parte3/internal/user"
+	"Ejercicio_Final-Taller_Go/internal/sales"
+	"Ejercicio_Final-Taller_Go/internal/user"
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
@@ -42,5 +42,6 @@ func InitRoutes(e *gin.Engine, userAPIURL string) { // Modificamos la firma para
 	salesHandler := NewSalesHandler(salesService, logger)
 
 	e.POST("/sales", salesHandler.handleCreateSale)
-	// Aquí podríamos agregar más rutas de ventas en el futuro
+	// Ruta para actualizar el estado de una venta
+	e.PATCH("/sales/:id", salesHandler.PatchSaleHandler(salesService))
 }

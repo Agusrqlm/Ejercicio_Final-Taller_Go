@@ -1,6 +1,7 @@
 package sales
 
 import (
+	"errors"
 	"fmt"
 	"math/rand"
 	"net/http"
@@ -9,6 +10,12 @@ import (
 	"github.com/google/uuid"
 	"go.uber.org/zap"
 )
+
+// Error para transiciones inválidas
+var ErrInvalidTransition = errors.New("invalid status transition")
+
+// Error para estados inválidos
+var ErrInvalidStatus = errors.New("invalid status value")
 
 // Service provides high-level sales management operations on a Storage backend.
 type Service struct {
@@ -86,4 +93,32 @@ func getRandomStatus() string {
 	statuses := []string{"pending", "approved", "rejected"}
 	randomIndex := rand.Intn(len(statuses))
 	return statuses[randomIndex]
+}
+
+// Modificar el estado de una venta
+func (s *Service) UpdateSaleStatus(saleID, newStatus string) (*Sale, error) {
+	sale, err := s.storage.Read(saleID)
+	if err != nil {
+		return nil, ErrNotFound
+	}
+
+	if newStatus != "approved" && newStatus != "rejected" {
+		return nil, ErrInvalidStatus
+
+	}
+
+	if sale.Status != "pending" {
+		return nil, ErrInvalidTransition
+	}
+
+	sale.Status = newStatus
+	sale.UpdatedAt = time.Now()
+	sale.Version++
+
+	if err := s.storage.Set(sale); err != nil {
+		s.logger.Error("failed to update sale", zap.String("sale_id", sale.ID), zap.Error(err))
+		return nil, err
+	}
+
+	return sale, nil
 }

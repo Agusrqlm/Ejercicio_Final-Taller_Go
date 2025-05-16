@@ -3,7 +3,7 @@ package api
 import (
 	"net/http"
 
-	"parte3/internal/sales"
+	"Ejercicio_Final-Taller_Go/internal/sales"
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
@@ -20,6 +20,37 @@ func NewSalesHandler(salesService *sales.Service, logger *zap.Logger) *salesHand
 	return &salesHandler{
 		salesService: salesService,
 		logger:       logger,
+	}
+}
+
+func (h *salesHandler) PatchSaleHandler(saleService *sales.Service) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		saleID := c.Param("id")
+		var req struct {
+			Status string `json:"status"`
+		}
+
+		if err := c.ShouldBindJSON(&req); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request body"})
+			return
+		}
+
+		updated, err := saleService.UpdateSaleStatus(saleID, req.Status)
+		if err != nil {
+			switch err {
+			case sales.ErrNotFound:
+				c.JSON(http.StatusNotFound, gin.H{"error": "sale not found"})
+			case sales.ErrInvalidStatus:
+				c.JSON(http.StatusBadRequest, gin.H{"error": "invalid status value"})
+			case sales.ErrInvalidTransition:
+				c.JSON(http.StatusConflict, gin.H{"error": "invalid status transition"})
+			default:
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "internal error"})
+			}
+			return
+		}
+
+		c.JSON(http.StatusOK, updated)
 	}
 }
 

@@ -5,7 +5,7 @@ import (
 	"log"
 	"os"
 
-	"parte3/api"
+	"Ejercicio_Final-Taller_Go/api"
 
 	"github.com/gin-gonic/gin"
 )
