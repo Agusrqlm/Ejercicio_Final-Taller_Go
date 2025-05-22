@@ -81,3 +81,12 @@ func (h *salesHandler) handleCreateSale(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusCreated, sale)
 }
+
+func (h *salesHandler) handlerGetSale(ctx *gin.Context) {
+
+	idUser := ctx.Param("id")
+	stateSale := ctx.Params("state")
+
+	u, err := h.salesService.GetSale(idUser, stateSale)
+
+}

@@ -44,4 +44,5 @@ func InitRoutes(e *gin.Engine, userAPIURL string) { // Modificamos la firma para
 	e.POST("/sales", salesHandler.handleCreateSale)
 	// Ruta para actualizar el estado de una venta
 	e.PATCH("/sales/:id", salesHandler.PatchSaleHandler(salesService))
+	e.GET("/sales/", salesHandler.handlerGetSale)
 }

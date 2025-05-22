@@ -95,6 +95,36 @@ func getRandomStatus() string {
 	return statuses[randomIndex]
 }
 
+func (s *Service) GetSale(idUser, status string) (*Sale, error) {
+	
+	// Validar que el usuario existe llamando a la API de usuarios
+	userExists, err := s.validateUser(idUser)
+	if err != nil {
+		s.logger.Error("error validating user", zap.String("user_id", idUser), zap.Error(err))
+		return nil, fmt.Errorf("error validating user: %w", err)
+	}
+	if !userExists {
+		return nil, fmt.Errorf("user with ID '%s' not found", idUser)
+	}
+
+	if status != "" {//Si hay estado
+		switch status {
+			case ""
+			// Válido
+		default:
+			h.logger.Warn("Invalid status filter provided", zap.String("status", statusFilter))
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("Invalid status filter: '%s'. Must be 'pending', 'approved', or 'rejected'.", statusFilter)}) // 400 Bad Request
+			return
+		}
+
+	} else {//Si no hay estado, devolver todas las ventas 
+	
+	
+	}
+
+
+}
+
 // Modificar el estado de una venta
 func (s *Service) UpdateSaleStatus(saleID, newStatus string) (*Sale, error) {
 	sale, err := s.storage.Read(saleID)
@@ -122,3 +152,4 @@ func (s *Service) UpdateSaleStatus(saleID, newStatus string) (*Sale, error) {
 
 	return sale, nil
 }
+
