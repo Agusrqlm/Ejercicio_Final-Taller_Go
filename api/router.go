@@ -2,8 +2,9 @@ package api
 
 import (
 	"net/http"
+	"parte3/internal/sales"
 
-	"Ejercicio_Final-Taller_Go/internal/sales"
+	//"Ejercicio_Final-Taller_Go/internal/sales"
 	"Ejercicio_Final-Taller_Go/internal/user"
 
 	"github.com/gin-gonic/gin"
@@ -44,5 +45,6 @@ func InitRoutes(e *gin.Engine, userAPIURL string) { // Modificamos la firma para
 	e.POST("/sales", salesHandler.handleCreateSale)
 	// Ruta para actualizar el estado de una venta
 	e.PATCH("/sales/:id", salesHandler.PatchSaleHandler(salesService))
-	e.GET("/sales/", salesHandler.handlerGetSale)
+	e.GET("/sales", salesHandler.handlerGetSale)
+
 }

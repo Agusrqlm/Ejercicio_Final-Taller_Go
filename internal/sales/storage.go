@@ -12,6 +12,7 @@ var ErrEmptyID = errors.New("empty sale ID")
 type Storage interface {
 	Set(sale *Sale) error
 	Read(id string) (*Sale, error) // Aunque no se pide explícitamente ahora, puede ser útil
+	GetAll() ([]*Sale, error)
 	// Update(sale *Sale) error     // Podríamos necesitar esto en el futuro
 	// Delete(id string) error     // Podríamos necesitar esto en el futuro
 }
@@ -46,6 +47,15 @@ func (l *LocalStorage) Read(id string) (*Sale, error) {
 		return nil, ErrNotFound
 	}
 	return s, nil
+}
+
+// GetAll retrieves all sales from the local storage. <-- ¡NUEVA IMPLEMENTACIÓN!
+func (l *LocalStorage) GetAll() ([]*Sale, error) {
+	sales := make([]*Sale, 0, len(l.m))
+	for _, s := range l.m {
+		sales = append(sales, s)
+	}
+	return sales, nil
 }
 
 // // Update updates a sale in the local storage.

@@ -22,6 +22,16 @@ type Service struct {
 	storage    Storage
 	logger     *zap.Logger
 	userAPIURL string // URL base de la API de usuarios
+	
+}
+
+// Metadata para la respuesta de búsqueda
+type SalesMetadata struct {
+	Quantity    int     `json:"quantity"`
+	Approved    int     `json:"approved"`
+	Rejected    int     `json:"rejected"`
+	Pending     int     `json:"pending"`
+	TotalAmount float64 `json:"total_amount"`
 }
 
 // NewService creates a new Sales Service.
@@ -95,33 +105,81 @@ func getRandomStatus() string {
 	return statuses[randomIndex]
 }
 
-func (s *Service) GetSale(idUser, status string) (*Sale, error) {
-	
-	// Validar que el usuario existe llamando a la API de usuarios
-	userExists, err := s.validateUser(idUser)
+func (s *Service) SearchSale(userID, status string) ([]*Sale, SalesMetadata, error) {
+
+	//0. Validar que el usuario existe llamando a la API de usuarios
+	userExists, err := s.validateUser(userID)
 	if err != nil {
-		s.logger.Error("error validating user", zap.String("user_id", idUser), zap.Error(err))
-		return nil, fmt.Errorf("error validating user: %w", err)
+		s.logger.Error("error validating user", zap.String("user_id", userID), zap.Error(err))
+		return nil, SalesMetadata{}, fmt.Errorf("error validating user: %w", err)
 	}
 	if !userExists {
-		return nil, fmt.Errorf("user with ID '%s' not found", idUser)
+		return nil, SalesMetadata{}, fmt.Errorf("user with ID '%s' not found", userID)
 	}
 
-	if status != "" {//Si hay estado
+	// 1. Validar el status
+	var parsedStatus string
+	if status != "" {
 		switch status {
-			case ""
-			// Válido
+		case "pending":
+			parsedStatus = status
+		case "rejected":
+			parsedStatus = status
+		case "approved":
+			parsedStatus = status
 		default:
-			h.logger.Warn("Invalid status filter provided", zap.String("status", statusFilter))
-			ctx.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("Invalid status filter: '%s'. Must be 'pending', 'approved', or 'rejected'.", statusFilter)}) // 400 Bad Request
-			return
+			s.logger.Warn("Invalid status filter provided", zap.String("statusFilter", status))
+			return nil, SalesMetadata{}, fmt.Errorf("%w: '%s'", ErrInvalidStatus, status)
+		}
+	}
+
+	// 2. Obtener todas las ventas del storage
+	allSales, err := s.storage.GetAll()
+	if err != nil {
+		s.logger.Error("Failed to get all sales from storage", zap.Error(err))
+		return nil, SalesMetadata{}, fmt.Errorf("failed to retrieve sales: %w", err)
+	}
+
+	// 3. Filtrar y calcular metadatos
+
+	filteredSales := make([]*Sale, 0)
+	metadata := SalesMetadata{}
+
+	for _, sale := range allSales {
+		// Filtrar por UserID si se proporciona
+		if userID != "" && sale.UserID != userID {
+			continue
 		}
 
-	} else {//Si no hay estado, devolver todas las ventas 
-	
-	
+		// Filtrar por Status si se proporciona
+		if status != "" && sale.Status != string(parsedStatus) {
+			continue
+		}
+
+		// Si pasa los filtros, lo añade a los resultados y actualiza metadatos
+		filteredSales = append(filteredSales, sale)
+
+		// Actualizar metadatos
+		metadata.Quantity++
+		metadata.TotalAmount += sale.Amount
+		switch sale.Status { // Convertir a SaleStatus para el switch
+		case "approved":
+			metadata.Approved++
+		case "rejected":
+			metadata.Rejected++
+		case "pending":
+			metadata.Pending++
+		}
 	}
 
+	s.logger.Info("Sales search completed",
+		zap.String("userID_filter", userID),
+		zap.String("status_filter", status),
+		zap.Int("results_count", len(filteredSales)),
+		zap.Any("metadata", metadata),
+	)
+
+	return filteredSales, metadata, nil
 
 }
 
@@ -152,4 +210,3 @@ func (s *Service) UpdateSaleStatus(saleID, newStatus string) (*Sale, error) {
 
 	return sale, nil
 }
-

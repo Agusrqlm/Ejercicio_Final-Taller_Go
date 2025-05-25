@@ -84,9 +84,28 @@ func (h *salesHandler) handleCreateSale(ctx *gin.Context) {
 
 func (h *salesHandler) handlerGetSale(ctx *gin.Context) {
 
-	idUser := ctx.Param("id")
-	stateSale := ctx.Params("state")
+	idUser := ctx.Query("id")
+	stateSale := ctx.Query("state")
 
-	u, err := h.salesService.GetSale(idUser, stateSale)
+	// Llama al servicio para buscar y obtener metadatos
+	salesResults, metadata, err := h.salesService.SearchSales(idUser, stateSale)
+
+	if err != nil {
+		h.logger.Error("Error searching sales",
+			zap.String("userID_filter", idUser),
+			zap.String("status_filter", stateSale),
+			zap.Error(err),
+		)
+		// Si el error es por un estado inválido, es un Bad Request
+		if err.Error() == "invalid status value" {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		// Cualquier otro error es un Internal Server Error
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "failed to search sales: " + err.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"results": salesResults, "metadata": metadata})
 
 }
