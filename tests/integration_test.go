@@ -1,15 +1,16 @@
 package tests
 
 import (
+	"Ejercicio_Final-Taller_Go/api"
+	"Ejercicio_Final-Taller_Go/internal/user"
 	"bytes"
 	"encoding/json"
-	"github.com/gin-gonic/gin"
-	"github.com/stretchr/testify/require"
 	"net/http"
 	"net/http/httptest"
-	"parte3/api"
-	"parte3/internal/user"
 	"testing"
+
+	"github.com/gin-gonic/gin"
+	"github.com/stretchr/testify/require"
 )
 
 func TestIntegrationCreateAndGet(t *testing.T) {

@@ -22,7 +22,7 @@ type Service struct {
 	storage    Storage
 	logger     *zap.Logger
 	userAPIURL string // URL base de la API de usuarios
-	
+
 }
 
 // Metadata para la respuesta de búsqueda
@@ -108,6 +108,7 @@ func getRandomStatus() string {
 func (s *Service) SearchSale(userID, status string) ([]*Sale, SalesMetadata, error) {
 
 	//0. Validar que el usuario existe llamando a la API de usuarios
+	fmt.Printf("Validating user with ID: %s\n", userID)
 	userExists, err := s.validateUser(userID)
 	if err != nil {
 		s.logger.Error("error validating user", zap.String("user_id", userID), zap.Error(err))

@@ -1,11 +1,10 @@
 package main
 
 import (
+	"Ejercicio_Final-Taller_Go/api"
 	"fmt"
 	"log"
 	"os"
-
-	"Ejercicio_Final-Taller_Go/api"
 
 	"github.com/gin-gonic/gin"
 )

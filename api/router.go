@@ -1,8 +1,8 @@
 package api
 
 import (
+	"Ejercicio_Final-Taller_Go/internal/sales"
 	"net/http"
-	"parte3/internal/sales"
 
 	//"Ejercicio_Final-Taller_Go/internal/sales"
 	"Ejercicio_Final-Taller_Go/internal/user"

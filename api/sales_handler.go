@@ -83,12 +83,11 @@ func (h *salesHandler) handleCreateSale(ctx *gin.Context) {
 }
 
 func (h *salesHandler) handlerGetSale(ctx *gin.Context) {
-
-	idUser := ctx.Query("id")
+	idUser := ctx.Query("user_id")
 	stateSale := ctx.Query("state")
-
+	print("idUser:", idUser, "stateSale:", stateSale)
 	// Llama al servicio para buscar y obtener metadatos
-	salesResults, metadata, err := h.salesService.SearchSales(idUser, stateSale)
+	salesResults, metadata, err := h.salesService.SearchSale(idUser, stateSale)
 
 	if err != nil {
 		h.logger.Error("Error searching sales",
